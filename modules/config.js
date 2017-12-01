@@ -29,9 +29,7 @@ var api = function(action, query){
   return url;
 };
 
-var AAR_URI = "http://campus-aar.fr/asa/aar_root.owl";
-var ARC_URI = "http://campus-aar.fr/asa/arc_root.owl";
-var AHM_URI = "http://campus-aar.fr/asa/ahg_root.owl";
+
 
 var config = (function () {
 	var Config = function() {};
@@ -42,80 +40,13 @@ var config = (function () {
       todo('change arc/ahm rootIds');
 
       cache = {
-        "sites": ["agora", "campus", "arc", "ahm", "test", "psa","pcu"],
+        "sites": ["pcu"],
         "metadata": {
-          agora: {
-            title: "Agora"
-          },
-          arc: {
-            title: "ARC"
-          },
-          ahm: {
-            title: "AHM"
-          },
-          campus: {
-            title: "CampusAAR"
-          },
-          test: {
-            title: "Armadillo"
-          },
-          psa: {
-            title: "PSA"
-          }
-          ,
           pcu: {
             title: "pcu"
           }
         },
-        "cms": {
-          "api": perEnvironmentConfig.api,
-          "menu": {
-            "agora": 22,
-            "campus": 23,
-            "arc": 22,
-            "ahm": 22,
-            "test": 22,
-            "psa": 22
-          },
-          "subjects": {
-            "agora": 3,
-            "arc": 2,
-            "ahm": 1503,
-            "campus": 3,
-            "test": 3,
-            "psa": 3
-          },
-          "analysis": {
-            "agora": "aar",
-            "arc": "arc",
-            "ahm": "ahm",
-            "campus": "*",
-            "test": "aar",
-            "psa": "aar"
-          }
-        },
-        "campus": {
-          "agora": {
-            host: "http://lab2.armadillo.fr/campus-aar-api/",
-            uri: AAR_URI,
-            ontology: "http://campus-aar.fr/asa/aar.owl"
-          },
-          "arc": {
-            host: "http://lab2.armadillo.fr/campus-aar-api/",
-            uri: ARC_URI,
-            ontology: "http://campus-aar.fr/asa/arc.owl"
-          },
-          "ahm": {
-            host: "http://lab2.armadillo.fr/campus-aar-api/",
-            uri: AHM_URI,
-            ontology: "http://campus-aar.fr/asa/ahg.owl"
-          },
-          "campus": {
-            host: "http://lab2.armadillo.fr/campus-aar-api/",
-            uris: [AAR_URI, ARC_URI, AHM_URI],
-          }
-        },
-        "db": perEnvironmentConfig.db,
+       "db": perEnvironmentConfig.db,
         "es": {
           "host": "localhost",
           

@@ -1,7 +1,7 @@
 var debug = require('debug')('arma:app');
 var errorLog = require('debug')('arma:error');
 var assert = require('assert');
-var expressListRoutes   = require('express-list-routes');
+
 var express = require('express');
 var path = require('path');
 global.appRoot = path.resolve(__dirname);
@@ -10,9 +10,6 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var expressSession = require('express-session');
 var flash = require('connect-flash');
-/*
-var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;*/
 
 var bodyParser = require('body-parser');
 var config = require('./modules/config').all();
@@ -32,14 +29,8 @@ var User= require('./modules/user/user.js');
 var _ = require('lodash');
 var pageUtils = require('./utils/page-utils');
 
-var contentManager = require('./modules/cms/content-manager');
 
 var webpack, webpackMiddleware, webpackConfig, webpackCompiler, hmr;
-///For Token 
-/*const jwt = require('jsonwebtoken');
-var jwts= require('jwt-simple');
-var jwtOptions = {}
-jwtOptions.secretOrKey =  uuid.v4();*/
 
 ///Configure app
 var cors = require('cors');
@@ -53,27 +44,13 @@ app.set('view engine', 'jade');
 
 app.use(logger('dev'));
 app.use(bodyParser.json());
-//app.use(bodyParser.urlencoded());
+
 app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(cookieParser());
-//app.use(expressSession({secret: 'armadillo-ekjrgr'}));
 app.use(flash());
-/*
-passport.serializeUser(function(user, done) {
-  done(null, user._id);
-});
- 
-passport.deserializeUser(function(id, done) {
- // done(null, id); // Simply using the name for now...
-  User.findById(id, function(err, user) {
-    done(err, user);
-   });
-});
 
-app.use(passport.initialize());
-app.use(passport.session());*/
 
 var isDevEnv = (app.get('env') === 'development');
 console.log('isDevEnv', isDevEnv);
@@ -113,228 +90,11 @@ var staticAsset = require('static-asset');
  var staticStrategy = require('./modules/cache-strategies/strategy-date');
   app.use(staticAsset(path.join(__dirname, 'public'), staticStrategy));
    app.use(express.static(path.join(__dirname, 'public')));
-  /*  passport.use(new LocalStrategy({     passReqToCallback : true   }, 
-    function(req, username, password, done){     
-    // var isValid = (password.length == (username.length + 2)) && (password == username + username[0] + username[username.length-1]); 
-        const isValid = (username === "admin") && (password === "campus-190"); 
-            debug(username, password, isValid);     if (!isValid) return done(null, false);   
-              return done(null, username);   } ));
-*/
+ 
 // Define default route for a generic site
 var router = express.Router();
-
 var webRouter = express.Router();
-/*
-var routerWithLogin = express.Router();
 
-
-var isAuthenticated = function (req, res, next) {
-  console.log('isAuthenticated');
-  if (req.isAuthenticated())
-    return next();
-  req.session.return_to = req.protocol + '://' + req.get('host') + req.originalUrl;
-  //res.redirect('/' + req.site + '/login');
-};
-
-/*routerWithLogin.post('/login', passport.authenticate('local'),
-  function(req, res) {
-    // If this function gets called, authentication was successful.
-    // `req.user` contains the authenticated user.
-    res.redirect(req.session.return_to || '/' + req.site);
-    req.session.return_to = null;
-  },serialize,generateToken,respond);
-
-*/
-/*
-routerWithLogin.post('/login', passport.authenticate('local'),
-  function(req, res) {
-    // If this function gets called, authentication was successful.
-    // `req.user` contains the authenticated user.
-    res.redirect(req.session.return_to || '/' + req.site);
-    req.session.return_to = null;
-  },respond);
-
-
-
-
-routerWithLogin.get('/logout', function (req, res){
-  req.session.destroy(function (err) {
-    res.redirect('/'); //Inside a callback… bulletproof!
-  });
-});
-
-
-
-routerWithLogin.post('/auth', passport.authenticate(  
-  'local', {
-    session: true
-  }), serialize, generateToken, respond);
-
-
-const db2 = {  
-  updateOrCreate: function(user, cb){
-    // db dummy, we just cb the user
-    cb(null, user);
-  }
-};
-
-
-
-
-function serialize(req, res, next) {  
-  db2.updateOrCreate(req.user, function(err, user){
-    if(err) {return next(err);}
-    // we store the updated information in req.user again
-    req.user = {
-      id: user._id
-    };
-    next();
-  });
-};
-
-
-/*function generateToken(req, res, next) {  
-  req.token = jwt.sign({
-    id: req.user._id,
-  }, jwtOptions.secretOrKey, {
-   expiresIn : 60*60*24
-  });
-  next();
-};*/
-/*
-function generateToken(req, res, next) {  
-
-console.log("UserId",req.user );
-console.log("Secret",jwtOptions.secretOrKey);
-var payload =  {id: req.user };
-var token = jwts.encode(payload, jwtOptions.secretOrKey);
-  
-
-req.token =token;
-   next();
-
-
-};
-
-
-
-
-
-function respond(req, res) {  
-
-  
-  res.status(200).json({
-    user: req.user.id,
-    token: req.token
-  });
-};
-
-
-/// Verfify Token
-
-
-
-routerWithLogin.post('/verify',   validate);
-
-
-
-function verifyToken(req, res, next) {  
-   console.log("ERRRRR",jwtOptions.secretOrKey);
-   try{
-     var  verifiedJwt = jwt.verify(req.token,jwtOptions.secretOrKey);
-       }catch(e){
-         console.log(e);
-        }
-   req.decoded= verifiedJwt ;
-  next();
-  
-
-};
-
-function validate(req, res,next) {
-  var token = req.token||req.body.token || req.query.token || req.headers['x-access-token'];
-  var secret = 'xxx';
-  console.log ("Token",token);
- try{
-  var decoded = jwts.decode(token, jwtOptions.secretOrKey);
-  console.log("Decod",decoded);
-  req.decoded= decoded.id  ;
-   console.log("Decod2",req.decoded.id);
- return User.findById(req.decoded.id, function (err, user) {
-    if (!err) {
-      return res.send(user);
-    } else {
-      return console.log(err);
-    }
-  });
-}catch(e){
-  console.log(e);
-next()
-}
-   
-
-
-};
-
-
-
-function respondverify(req, res) {  
-  res.status(200).json({
-    user: req.user.id,
-    token: req.token
-  });
-   
-
-};
-
-
-//return current user
-
-routerWithLogin.get('/currentuser',   function(req, res) {
-   
-   try{
-          return User.findById(req.user.id, function (err, user) {
-            if (!err) {
-                   var profiles=user.profiles
-                    return res.send(profiles );
-            } else {return console.log(err);
-                   }
-             });
-      }catch(e){
-          console.log(e);
-           next();
-          }
-    
-
-   
-  });
-
-
-
-
-
-
-
-
-
-*/
-
-// routerWithLogin.post('/login', passport.authenticate('local', {
-//   successRedirect: '/psa/search',
-//   failureRedirect: '/psa/login',
-//   failureFlash: 'Incorrect username or password'  
-//   // failureFlash : true 
-// }));
-
-/*routerWithLogin.get('/login', function(req, res){
-  var content = {
-    username: req.query.username,
-    error: req.flash('error')
-  };
-  pageUtils.computePage(contentManager, {app: 'login', content: content}, 'react-layout', req, res);
-});
-*/
-//routerWithLogin.use(isAuthenticated);*
 
 _.forIn(require('./modules'), function(module, moduleName) {
   if (moduleName == 'admin'){
@@ -348,13 +108,6 @@ _.forIn(require('./modules'), function(module, moduleName) {
 router.use(webRouter);
 router.use('/api',      apiRoutes);
 
-//router.use(routerWithLogin);
-
-// psaRouter.use(require('connect-ensure-login').ensureLoggedIn('/psa/login'), router);
-
-//psaRouter.use('/api',      apiRoutes); // Allow API calls
-//psaRouter.use(isAuthenticated);
- //psaRouter.use(webRouter);
 
 app.use('/ping', function(req, res){
   res.json({result: 'pong'});
@@ -380,9 +133,7 @@ app.post('/api/photo',function(req,res,next){
   upload(req,res,function(err) {        
     if(err) {
       console.log(err);
-      //debug("Error uploading file.",err);
-      //return next(err);
-      //return res.end("Error uploading file.");
+     
       return res.end(err);
     }
     debug("File is uploaded");
@@ -414,13 +165,7 @@ app.use('/:site', function(req, res, next){
     }
 });
 
-/*
-//Here is function for uploading an image
-app.use('/image', function(req, res){
-  debug(req);
-  debug("image upload");
-});
-*/
+
 
 app.get('/', function (req, res) {
   debug('redirect to root site');
@@ -479,22 +224,6 @@ var options = {
 
 router.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, false, options, '.swagger-ui .topbar { background-color: bleu }'));
 
-router.get('/', function(req, res) { res.json({ status: 'OK'}); });
-router.get('/bar', function(req, res) { res.json({ status: 'OKISH'}); });
-
-/*
-
-app.use(express.static('dist'));
-routerWithLogin.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument),function(err, req, res, next) {
-
-
-if (!res.getHeader('content-type')) {
-  var charset = mime.charsets.lookup(type);
-  res.setHeader('Content-Type', type + (charset ? '; charset=' + charset : ''));
-}}
-
-
-  );*/
 
 
 

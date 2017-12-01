@@ -2,7 +2,7 @@
 var webpack = require("webpack");
 var path = require('path');
 var nodeModulesPath = path.resolve(__dirname, 'node_modules');
-var appModulesPath = path.resolve(__dirname, 'src');
+//var appModulesPath = path.resolve(__dirname, 'src');
 
 //var pathToReact = path.resolve(node_modules, 'react/dist/react.min.js');
 var pathToSummernote = path.resolve(nodeModulesPath, 'summernote/dist/summernote.js');
@@ -51,12 +51,12 @@ plugins.push(new webpack.optimize.CommonsChunkPlugin({
 }));
 
 var config = {
-    context: appModulesPath,
+   // context: appModulesPath,
     entry: {
        
     
         'vendor': packEntries([
-            './utils/compat.jsx', 'react', 'react/addons', 'react-dom',
+             'react', 'react/addons', 'react-dom',
             'react-bootstrap', 'react-router', 
             'classnames', //'react-grid-layout', 
             'lodash/collection', 'lodash/lang', 'lodash/object'
@@ -72,7 +72,7 @@ var config = {
             {
                 test: /\.jsx?$/,
                 include: [
-                    appModulesPath
+                  //  appModulesPath
                 ],
                 loaders: (isDevEnv ? ['react-hot', babelLoader] : [babelLoader])
             },
@@ -89,7 +89,7 @@ var config = {
     },
     plugins: plugins,
     resolve: {
-        root: [appModulesPath, nodeModulesPath],
+        root: [ nodeModulesPath],
         alias: {
             summernote: pathToSummernote
         },

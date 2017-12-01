@@ -2,7 +2,7 @@
 var webpack = require("webpack");
 var path = require('path');
 var nodeModulesPath = path.resolve(__dirname, '../node_modules');
-var appModulesPath = path.resolve(__dirname, '../src');
+//var appModulesPath = path.resolve(__dirname, '../src');
 
 var isDevEnv = true;
 
@@ -23,7 +23,7 @@ var plugins = [
 plugins.push(new webpack.optimize.OccurenceOrderPlugin());
 
 var config = {
-    context: appModulesPath,
+   // context: appModulesPath,
     entry: {
         'vocab': packEntries('./export/vocab/export-vocab.jsx')
     },
@@ -38,7 +38,7 @@ var config = {
                 test: /\.jsx?$/,
                 //exclude: /node_modules/,
                 include: [
-                    appModulesPath
+                   // appModulesPath
                 ],
                 loaders: ['babel-loader?stage=1&optional=runtime']
             },
@@ -56,7 +56,7 @@ var config = {
     },
     plugins: plugins,
     resolve: {
-        root: [appModulesPath, nodeModulesPath],
+        root: [nodeModulesPath],
         extensions: ['', '.js', '.jsx', '.json']
     },
     externals: {

@@ -132,13 +132,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "http://git.tamago.fr/web/campus-aar"
+    "url": "http://git.ta"
   },
   "keywords": [
-    "ARC",
-    "Agora",
-    "AAR",
-    "campus"
+    "PCU"
   ],
   "author": "Armadillo",
   "license": "UNLICENSED",
