@@ -6,10 +6,13 @@ var mongoose = require('mongoose');
 
 
 var querySchema = new mongoose.Schema({
-    name: String,
-    description: String,
+    id: String,
     config: String,
-    result: String,
+    content: String,
+    description: String,
+    name: String,
+    type: String,
+    response: String,
     esquery: String
 });
 

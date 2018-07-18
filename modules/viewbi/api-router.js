@@ -11,7 +11,7 @@ var client =require('./elastic-management.js');
 var Query= require('./query.js');
 var querySchema=require('mongoose').model('query').schema;
 
-
+var esb = require('elastic-builder');
 
 
 /*********************************************************************************************/
@@ -78,10 +78,16 @@ router.get('/viewes/:datasource/:viewtype/search/:query', function (req, res){
   var type=req.params.viewtype;
   var query=req.params.query;
 
+  //var mybody = new esb.RequestBodySearch().query(new esb.termQuery('MaritalStatus','Female'));
+  var mybody = new esb.RequestBodySearch().query(new esb.MatchAllQuery());
+  console.log('esbmybody',mybody.toJSON());
+
+  console.log('esbmybody',mybody.toJSON());
+
 client.search({  
   index: indice,
   type: type,
-  q: query
+  body: mybody.toJSON()   //   q: query
   },function (error, resp,status) {
     if (error){
       console.log("search error: "+error)
@@ -91,6 +97,41 @@ client.search({
       console.log(resp);
       console.log("--- Hits ---");
       return res.send(resp.hits.hits);
+     
+    }
+});
+});
+
+router.post('/myquery/:datasource/:viewtype', function (req, res){
+  var indice=req.params.datasource;
+  var type=req.params.viewtype;
+  console.log('myquery req.body',req.body);
+  var body= req.body;
+
+  //var mybody = new esb.RequestBodySearch().query(new esb.termQuery('MaritalStatus','Female'));
+  //var mybody = new esb.RequestBodySearch().query(new esb.MatchAllQuery());
+  //console.log('esbmybody',mybody.toJSON());
+  //console.log('esbmybody',mybody.toJSON());
+
+  console.log('myquery indice',indice);
+  console.log('myquery type',type);
+  console.log('myquery body',body);
+
+
+  client.search({  
+  index: indice,
+  type: type,
+  body: body, //mybody.toJSON()
+  },function (error, resp,status) {
+    if (error){
+      console.log("myquery error: "+error)
+    }
+    else {
+      console.log("--- myquery status ---");
+      console.log(status);
+      console.log("--- myquery resp ---");
+      console.log(resp);
+      return res.send(resp);
      
     }
 });
@@ -243,7 +284,8 @@ function (error,resp) {
 router.get('/view/:datasource/:viewtype', function (req, res){
   var indice=req.params.datasource;
   var type=req.params.viewtype;
-
+console.log("ici");
+console.log(type);
 client.indices.getMapping({  
     'index': indice,
     'type': type,
@@ -346,6 +388,308 @@ client.search({
 });
 
 });
+
+///returns min max and avg mesure
+
+
+router.get('/view/:datasource/:type/metrics/:field', function (req, res){
+  var indice=req.params.datasource;
+  var type=req.params.type;
+  var field=req.params.field;
+   var option="true"; //req.query.hits;
+client.search({
+            index: indice,
+            type: type,
+            body: {
+                "aggs": {
+                  avgvalue :
+                    {
+                        "avg": {
+                            "field": field
+                            }
+                    },
+                  minvalue: {
+                        "min": {
+                            "field": field
+                            }
+                    },
+                  maxvalue: {
+                        "max": {
+                            "field": field
+                            }
+                    },
+                  sumvalue : {
+                        "sum": {
+                            "field": field
+                            }
+                    },
+                  type_count : {
+                      "cardinality": {
+                          "field": field
+                          }
+                    },
+                  types_count : {
+                      "value_count": {
+                          "field": field
+                          }
+                    },
+                  /*grades_stats : {
+                    "extended_stats": {
+                        "field": field
+                        }
+                    },
+                  field_outlier : {
+                      "percentiles": {
+                          "field": field
+                          }
+                      },*/
+                
+                }
+            }
+
+},function (error, resp,status) {
+    if (error){
+      console.log("search error: "+error)
+    }
+    else {
+       if (option == "true")
+      {
+        var result={};
+
+        result["hits"]= resp.hits;
+        result["aggregation"]=resp.aggregations;
+         console.log("ICI",result);
+        return res.send(resp);
+
+      }else{
+
+         return res.send(resp.aggregations);
+
+      }
+    
+    }
+});
+
+});
+
+///returns group by
+
+router.get('/view/:datasource/:viewtype/groupby/:field', function (req, res){
+  var indice=req.params.datasource;
+  var type= req.params.viewtype;
+  var field=req.params.field+".keyword";
+  client.search({
+    index: indice,
+    type: type,
+    body: {
+      "size": 0,
+       "aggregations": {
+            "group_by_field": {
+                "terms": {
+                    "field": field
+                }
+            }
+        }
+    }
+
+},function (error, resp,status) {
+    if (error){
+      console.log("search error: "+error)
+    }
+    else {
+    
+         return res.send(resp.aggregations);
+
+    }
+});
+
+});
+
+
+
+
+router.get('/view/:datasource/:viewtype/groupby/:field1/:field2', function (req, res){
+  var indice=req.params.datasource;
+  var type= req.params.viewtype;
+  var field1=req.params.field1+".keyword";
+  var field2=req.params.field2+".keyword";
+  client.search({
+    index: indice,
+    type: type,
+    body: {
+      "size": 0,
+       "aggregations": {
+            "group_by_field1": {
+                "terms": {
+                    "field": field1
+                },
+                "aggs":{
+                  "group_by_field2": {
+                   "terms": {
+                    "field": field2
+                }
+
+
+                }
+
+
+
+            }
+        }
+    }
+
+}},function (error, resp,status) {
+    if (error){
+      console.log("search error: "+error)
+    }
+    else {
+    
+         return res.send(resp.aggregations);
+
+    }
+});
+
+});
+
+
+
+
+
+//EXAMPLE OF COMPLEX QUERY
+
+
+///par example la somme des ventes des équipements de comping par pays
+
+
+router.get('/view/:datasource/:viewtype/Aggregation/:field1/By/:field2', function (req, res){
+  var indice=req.params.datasource;
+  var type= req.params.viewtype;
+  var field1=req.params.field1+".keyword";
+  var field2=req.params.field2+".keyword";
+  var option=req.query.filter;
+  var script="try { return Float.parseFloat(doc['"+field2+"'].value);} catch (NumberFormatException e) {return 0;}"
+  if( option !== null && option !== ''){
+   var parsedvalue=JSON.parse(option);
+    client.search({
+    index: indice,
+    type: type,
+    body: {
+ "size":0,
+ "query":{
+  "term": parsedvalue
+
+},
+ "aggs" : {
+     "states_by_sale" : {
+         "terms" : {
+           "field" : field1,
+           "order": {
+              "country_revenue" : "desc"
+           }
+         },
+         "aggs": {
+             "country_revenue": {
+                "sum": {
+                "script": script
+                }
+             }
+          }
+    },
+    "total_revenue" : {
+       "sum": {
+          "script": script
+       }
+     }
+ }
+}
+
+
+
+
+
+
+},function (error, resp,status) {
+    if (error){
+      console.log("search error: "+error)
+    }
+    else {
+    
+         return res.send(resp.aggregations);
+
+    }
+});
+
+}else{
+
+
+ client.search({
+    index: indice,
+    type: type,
+    body: {
+ "size":0,
+ "query":{
+  "term": parsedvalue
+
+},
+ "aggs" : {
+     "states_by_sale" : {
+         "terms" : {
+           "field" : field1,
+           "order": {
+              "country_revenue" : "desc"
+           }
+         },
+         "aggs": {
+             "country_revenue": {
+                "sum": {
+                "script": script
+                }
+             }
+          }
+    },
+    "total_revenue" : {
+       "sum": {
+          "script": script
+       }
+     }
+ }
+}
+
+
+
+
+
+
+},function (error, resp,status) {
+    if (error){
+      console.log("search error: "+error)
+    }
+    else {
+    
+         return res.send(resp.aggregations);
+
+    }
+});
+
+
+
+}
+
+
+
+
+
+});
+
+
+
+
+
+
+
+
+
+
 
 ///returns min max and avg mesure
 

@@ -11,7 +11,7 @@ var client = new elasticsearch.Client({
   host: 'localhost:9200',
   log: 'trace'
 });
-//just a databse test
+//just a database test
 
 
 
