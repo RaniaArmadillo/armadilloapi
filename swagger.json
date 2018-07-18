@@ -444,7 +444,120 @@
       
       
       
-    }
+    },
+
+    "/view/:datasource/:viewtype/groupby/:field1/:field2":{
+     "get": {
+        "description": "Returns a  set of documents grouped by two fields",
+          "tags": [
+         "metrics"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "datasource",
+            "in": "path",
+            "description": "datasource name",
+            "required": true,
+            "type": "string"
+          },
+           {
+            "name": "viewtype",
+            "in": "path",
+            "description": "type name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "field1",
+            "in": "path",
+            "description": "field name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "field2",
+            "in": "path",
+            "description": "field name",
+            "required": true,
+            "type": "string"
+          }
+
+        ],
+        "responses": {
+          "200": {
+            "description": "a set of entity.",
+            "schema": {
+               "$ref": "#/definitions/Entity"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+                      }
+                    }
+            }
+         }
+
+
+      },
+
+"/view/{datasource}/{viewtype}/groupby/{field}":{
+     "get": {
+        "description": "Returns a  set of documents grouped by a specific field",
+          "tags": [
+         "metrics"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "datasource",
+            "in": "path",
+            "description": "datasource name",
+            "required": true,
+            "type": "string"
+          },
+           {
+            "name": "viewtype",
+            "in": "path",
+            "description": "type name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "field",
+            "in": "path",
+            "description": "field name",
+            "required": true,
+            "type": "string"
+          }
+
+        ],
+        "responses": {
+          "200": {
+            "description": "a set of entity.",
+            "schema": {
+               "$ref": "#/definitions/Entity"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+                      }
+                    }
+            }
+         }
+
+
+      }
+
+
   },
   "definitions": {
     "viewType": {
